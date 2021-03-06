@@ -1,0 +1,13 @@
+name: search_engine
+version: 0.1.0
+
+authors:
+  - Stephanie Wilde-Hobbs <git@stephanie.is>
+
+targets:
+  search_engine:
+    main: src/entrypoint.cr
+
+crystal: 0.36.1
+
+license: MIT
