@@ -18,16 +18,20 @@ module SearchEngine::Crawler
         raise Crawler::Error.new("URL #{url} returned status #{response.status}")
       end
 
-      xml = XML.parse_html(response.body_io)
-      Page.new(url, xml)
+      begin
+        html = XML.parse_html(response.body_io)
+        Page.new(url, html)
+      rescue ex
+        raise Crawler::Error.new("parsing HTML", ex)
+      end
     end
   end
 
   class Page
     getter url : URI
-    getter dom : XML::Node
+    getter html : XML::Node
 
-    def initialize(@url, @dom)
+    def initialize(@url, @html)
     end
   end
 end

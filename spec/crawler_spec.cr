@@ -3,7 +3,7 @@ require "./spec_helper"
 describe SearchEngine::Crawler do
   it "parses pages" do
     page = SearchEngine::Crawler.crawl(spec_url("sample1.html"))
-    title = page.dom.xpath_node("//head/title").not_nil!.content
+    title = page.html.xpath_node("//head/title").not_nil!.content
     title.should eq("Text Summarization | Text Summarization Using Deep Learning")
   end
 
