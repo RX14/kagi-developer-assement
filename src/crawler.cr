@@ -19,14 +19,15 @@ module SearchEngine::Crawler
       end
 
       xml = XML.parse_html(response.body_io)
-      Page.new(xml)
+      Page.new(url, xml)
     end
   end
 
   class Page
+    getter url : URI
     getter dom : XML::Node
 
-    def initialize(@dom)
+    def initialize(@url, @dom)
     end
   end
 end
