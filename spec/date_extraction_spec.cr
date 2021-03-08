@@ -44,6 +44,12 @@ describe SearchEngine::DateExtraction do
       result.should eq(Date.new(2020))
     end
 
+    it "extracts a date from opengraph" do
+      page = crawl("sample1.html")
+      result = DateExtraction.extract_date(page)
+      result.should eq(Date.new(2019, 6, 10))
+    end
+
     it "returns nil if no date can be extracted" do
       page = page("http://example.com/blog/article", empty_html)
       result = DateExtraction.extract_date(page)

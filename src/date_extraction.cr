@@ -5,6 +5,7 @@ require "./crawler"
 module SearchEngine::DateExtraction
   DATE_EXTRACTORS = [
     ->extract_date_from_url(Crawler::Page),
+    ->extract_date_from_opengraph(Crawler::Page),
   ] of Crawler::Page -> DateExtraction::Result?
 
   # Extracts a date from a `Crawler::Page` by running all registered date
