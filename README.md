@@ -15,9 +15,12 @@ TODO: Write usage instructions here
 
 ### Design
 
-The core of the search engine is the Crawler and DateExtraction classes. These
+The core of the search engine logic is the `Crawler` and `DateExtraction` classes. These
 classes implement fetching the page, and extracting the date from the page respectively.
-The API documentation provides details on these two classes.
+The `SearchEngine` class contains all the transient state (database connection) for the
+search engine, and provides a coordination point for the high level tasks including
+dispatching searches in parallel.
+The API documentation provides further details on these classes.
 
 ## Contributing
 
