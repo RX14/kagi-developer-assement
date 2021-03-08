@@ -1,10 +1,11 @@
-# search_engine
+# Example Search Engine
 
-TODO: Write a description here
+An example search engine written for Kagi developer assessment.
 
 ## Installation
 
-TODO: Write installation instructions here
+Running `shards build` will build an executable in bin/search-engine.
+Running this executable will print a URL for a development server.
 
 ## Usage
 
@@ -12,7 +13,11 @@ TODO: Write usage instructions here
 
 ## Development
 
-TODO: Write development instructions here
+### Design
+
+The core of the search engine is the Crawler and DateExtraction classes. These
+classes implement fetching the page, and extracting the date from the page respectively.
+The API documentation provides details on these two classes.
 
 ## Contributing
 
