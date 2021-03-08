@@ -27,3 +27,7 @@ end
 def spec_url(route)
   URI.parse("http://#{SPEC_SERVER.addresses.first}/#{route}")
 end
+
+def empty_html
+  XML.parse_html("<html></html>")
+end
