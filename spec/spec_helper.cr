@@ -31,3 +31,9 @@ end
 def empty_html
   XML.parse_html("<html></html>")
 end
+
+def page(uri, html)
+  uri = URI.parse(uri) unless uri.is_a?(URI)
+  html = XML.parse_html(html) unless html.is_a?(XML::Node)
+  SearchEngine::Crawler::Page.new(uri, html)
+end

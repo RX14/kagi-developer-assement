@@ -47,7 +47,7 @@ module SearchEngine::DateExtraction
     # Match URLs which contain 2021-01-01 or 2021/01/01 or 20210101.
     # Pages before 2000 are not matched for false positives.
     # TODO: try and detect american date formats?
-    return unless match = page.url.path.match(/\b(20\d\d)[\/-_]?(\d\d?)?[\/-_]?(\d\d?)?\b/)
+    return unless match = page.url.path.match(/\b(20\d\d)[\/\-_]?(\d\d?)?[\/\-_]?(\d\d?)?\b/)
     year = match[1].to_i
     month = match[2]?.try(&.to_i)
     day = match[3]?.try(&.to_i)

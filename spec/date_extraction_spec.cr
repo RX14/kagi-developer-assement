@@ -41,13 +41,50 @@ describe SearchEngine::DateExtraction do
 
   describe ".extract_date_from_url" do
     it "extracts dates from URLs" do
-      uri = URI.parse("http://example.com/blog/2020/03/12/article")
-      page = SearchEngine::Crawler::Page.new(uri, empty_html)
+      page = page("http://example.com/blog/2020/03/12/article", empty_html)
       result = DateExtraction.extract_date_from_url(page).not_nil!
 
       result.confidence.should eq(2)
       result.range.should eq(Time.utc(2020, 3, 12)..Time.utc(2020, 3, 12).at_end_of_day)
       result.exact?.should be_true
+
+      page = page("http://example.com/blog/2020/3/article", empty_html)
+      result = DateExtraction.extract_date_from_url(page).not_nil!
+
+      result.confidence.should eq(2)
+      result.range.should eq(Time.utc(2020, 3, 1)..Time.utc(2020, 3, 31).at_end_of_day)
+      result.exact?.should be_false
+
+      page = page("http://example.com/blog/2020/article", empty_html)
+      result = DateExtraction.extract_date_from_url(page).not_nil!
+
+      result.confidence.should eq(2)
+      result.range.should eq(Time.utc(2020, 1, 1)..Time.utc(2020, 12, 31).at_end_of_day)
+      result.exact?.should be_false
+
+      page = page("http://example.com/blog/article-2020-2-3", empty_html)
+      result = DateExtraction.extract_date_from_url(page).not_nil!
+
+      result.confidence.should eq(2)
+      result.range.should eq(Time.utc(2020, 2, 3)..Time.utc(2020, 2, 3).at_end_of_day)
+      result.exact?.should be_true
+
+      page = page("http://example.com/blog/2020/2_3-article", empty_html)
+      result = DateExtraction.extract_date_from_url(page).not_nil!
+
+      result.confidence.should eq(2)
+      result.range.should eq(Time.utc(2020, 2, 3)..Time.utc(2020, 2, 3).at_end_of_day)
+      result.exact?.should be_true
+    end
+
+    it "doesn't extract dates from dubious URLs" do
+      page = page("http://example.com/432021-2-8", empty_html)
+      result = DateExtraction.extract_date_from_url(page)
+      result.should be_nil
+
+      page = page("http://example.com/21-2-8-article", empty_html)
+      result = DateExtraction.extract_date_from_url(page)
+      result.should be_nil
     end
   end
 end
