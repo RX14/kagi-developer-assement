@@ -37,3 +37,7 @@ def page(uri, html)
   html = XML.parse_html(html) unless html.is_a?(XML::Node)
   SearchEngine::Crawler::Page.new(uri, html)
 end
+
+def crawl(route)
+  SearchEngine::Crawler.crawl(spec_url(route))
+end

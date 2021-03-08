@@ -109,4 +109,36 @@ describe SearchEngine::DateExtraction do
       result.should be_nil
     end
   end
+
+  describe ".extract_date_from_opengraph" do
+    it "ignores pages with no date" do
+      page = page("http://example.com/article", empty_html)
+      result = DateExtraction.extract_date_from_opengraph(page)
+      result.should be_nil
+
+      page = crawl("github.html")
+      result = DateExtraction.extract_date_from_opengraph(page)
+      result.should be_nil
+    end
+
+    it "extracts date from opengraph article:published_time properties" do
+      page = page("http://example.com/article", <<-HTML)
+        <html>
+          <head>
+            <meta property="article:published_time" content="2021-03-08T15:49:01Z" />
+          </head>
+        </html>
+        HTML
+      result = DateExtraction.extract_date_from_opengraph(page).not_nil!
+
+      result.confidence.should eq(9)
+      result.date.should eq(Date.new(2021, 3, 8))
+
+      page = crawl("sample1.html")
+      result = DateExtraction.extract_date_from_opengraph(page).not_nil!
+
+      result.confidence.should eq(9)
+      result.date.should eq(Date.new(2019, 6, 10))
+    end
+  end
 end

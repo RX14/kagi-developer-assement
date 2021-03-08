@@ -41,12 +41,16 @@ module SearchEngine::DateExtraction
       raise ArgumentError.new("Date has day but no month!") if @day && !@month
     end
 
+    def self.new(time : Time)
+      new(time.year, time.month, time.day)
+    end
+
     # Two dates are equal if their year, month, and day are identical
     def_equals_and_hash @year, @month, @day
   end
 
   # Represents the result of a date extractor. Each date extractor will produce
-  # a `Date`, with associated confidence value betwene 0 and 10.
+  # a `Date`, with associated confidence value between 0 and 10.
   class Result
     # The date extracted from the page.
     getter date : Date
@@ -68,7 +72,7 @@ module SearchEngine::DateExtraction
 
   # Extracts a date from the URL of a page. Works for many blog pages which have
   # URLs like "/blog/2020/01/2/title".
-  def self.extract_date_from_url(page : Crawler::Page)
+  def self.extract_date_from_url(page : Crawler::Page) : Result?
     # Match URLs which contain 2021-01-01 or 2021/01/01 or 20210101.
     # Pages before 2000 are not matched for false positives.
     # TODO: try and detect american date formats?
@@ -81,5 +85,18 @@ module SearchEngine::DateExtraction
     day = match[3]?.try(&.to_i)
 
     Result.new(Date.new(year, month, day), 2)
+  end
+
+  # Extracts publication date from opengraph tags in the page.
+  #
+  # See https://ogp.me/
+  def self.extract_date_from_opengraph(page : Crawler::Page) : Result?
+    node = page.html.xpath_node("//meta[@property='article:published_time']")
+    return unless node
+
+    return unless time = node["content"]?
+    time = Time.parse_iso8601(time)
+
+    Result.new(Date.new(time), 9)
   end
 end
