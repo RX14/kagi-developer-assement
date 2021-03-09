@@ -65,5 +65,28 @@ describe "SearchEngine web server" do
         end
       end
     end
+
+    it "busts the cache" do
+      crawler = SearchEngine::Crawler.new
+
+      page = crawler.crawl(spec_url("random"))
+      content1 = page.html.xpath_node("//body").not_nil!.content
+
+      page = crawler.crawl(spec_url("random"))
+      content2 = page.html.xpath_node("//body").not_nil!.content
+
+      content1.should eq(content2)
+
+      with_websocket do |ws|
+        ws.send %<{"type": "clear_cache"}>
+        sleep 10.milliseconds
+        ws.close
+      end
+
+      page = crawler.crawl(spec_url("random"))
+      content3 = page.html.xpath_node("//body").not_nil!.content
+
+      content2.should_not eq(content3)
+    end
   end
 end

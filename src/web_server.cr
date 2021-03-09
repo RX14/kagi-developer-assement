@@ -7,7 +7,7 @@ class Command
 
   getter type : String
 
-  getter urls : Array(String)
+  getter urls : Array(String)?
 end
 
 class Response
@@ -33,7 +33,8 @@ ENGINE = SearchEngine.new
 
 private def crawl(ws, command)
   time = Time.measure do
-    result_chan = ENGINE.crawl(command.urls.map { |url| URI.parse(url) })
+    urls = command.urls.not_nil!.map { |url| URI.parse(url) }
+    result_chan = ENGINE.crawl(urls)
 
     while result = result_chan.receive?
       ws.send(Response.new(crawl_result: result).to_json)
@@ -58,6 +59,8 @@ ws "/websocket" do |ws|
     case command.type
     when "crawl"
       crawl(ws, command)
+    when "clear_cache"
+      ENGINE.crawler.clear_cache
     else
       next ws.close(:unsupported_data, "Invalid command type")
     end

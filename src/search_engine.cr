@@ -5,6 +5,8 @@ require "redis"
 class SearchEngine
   VERSION = "0.1.0"
 
+  getter crawler : Crawler
+
   def initialize(redis_host = "localhost", redis_port = 6379)
     @crawler = Crawler.new(redis_host, redis_port)
   end
