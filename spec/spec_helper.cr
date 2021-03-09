@@ -14,6 +14,8 @@ SPEC_SERVER = begin
     when "/redirect"
       ctx.response.headers["Location"] = "/sample1.html"
       ctx.response.status_code = 302
+    when "/random"
+      ctx.response.puts Random::DEFAULT.hex(8)
     else
       ctx.response.respond_with_status(404)
     end

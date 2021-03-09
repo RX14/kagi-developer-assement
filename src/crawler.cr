@@ -50,6 +50,16 @@ class SearchEngine::Crawler
     response.body
   end
 
+  def clear_cache
+    cursor = "0"
+
+    loop do
+      cursor, keys = @redis.scan(cursor, "search_engine:url_cache:*")
+      @redis.del(keys.as(Array).map(&.as(String)))
+      break if cursor == "0"
+    end
+  end
+
   class Page
     getter url : URI
     getter html : XML::Node
