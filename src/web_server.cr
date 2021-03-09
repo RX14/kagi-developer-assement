@@ -17,23 +17,30 @@ class Response
 
   getter crawl_result : SearchEngine::Result?
 
+  getter total_time : Float64?
+
   def initialize(*, @crawl_result : SearchEngine::Result)
     @type = "result"
+  end
+
+  def initialize(*, total_time : Time::Span)
+    @type = "done"
+    @total_time = total_time.to_f
   end
 end
 
 ENGINE = SearchEngine.new
 
 private def crawl(ws, command)
-  begin
+  time = Time.measure do
     result_chan = ENGINE.crawl(command.urls.map { |url| URI.parse(url) })
-  rescue ex : URI::Error
-    return ws.close(:unsupported_data, "Invalid URI")
+
+    while result = result_chan.receive?
+      ws.send(Response.new(crawl_result: result).to_json)
+    end
   end
 
-  while result = result_chan.receive?
-    ws.send(Response.new(crawl_result: result).to_json)
-  end
+  ws.send(Response.new(total_time: time).to_json)
 end
 
 get "/" do |env|

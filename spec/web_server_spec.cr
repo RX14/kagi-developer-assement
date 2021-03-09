@@ -44,9 +44,15 @@ describe "SearchEngine web server" do
             #{spec_url("sample1.html").to_s.to_json}
           ]}>
 
-        i = 0
         ws.on_message do |msg|
           json = JSON.parse(msg)
+
+          if json["type"] == "done"
+            json["total_time"].as_f
+            ws.close
+            next
+          end
+
           json["type"].should eq("result")
           case json["crawl_result"]["url"]
           when spec_url("github.html").to_s
@@ -55,10 +61,6 @@ describe "SearchEngine web server" do
             json["crawl_result"]["date"].should eq("Jun 10, 2019")
           else
             raise "BUG"
-          end
-
-          if (i += 1) == 2
-            ws.close
           end
         end
       end

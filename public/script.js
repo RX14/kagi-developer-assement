@@ -4,6 +4,7 @@
     const crawlSubmitButton = document.getElementById("crawl-submit");
     const crawlTextarea = document.getElementById("crawl-textarea");
     const crawlFormBody = document.getElementById("crawl-form-body");
+    const crawlTime = document.getElementById("crawl-time");
 
     let websocket = new WebSocket(`ws://${document.location.host}/websocket`);
 
@@ -21,12 +22,16 @@
         websocket.send(JSON.stringify({type: "crawl", urls}))
     });
 
+    function formatTime(float) {
+        return `${(float*1000).toFixed(2)}ms`;
+    }
+
     function handleCrawlResult(result) {
         let url = document.createElement("td");
         url.innerText = result.url;
 
         let time = document.createElement("td");
-        time.innerText = `${(result.crawl_time*1000).toFixed(2)}ms`;
+        time.innerText = formatTime(result.crawl_time);
 
         let resultNode = document.createElement("td");
         if (result.error_message) {
@@ -48,6 +53,9 @@
         switch (response.type) {
             case "result":
                 handleCrawlResult(response.crawl_result);
+                break;
+            case "done":
+                crawlTime.innerText = formatTime(response.total_time);
                 break;
         }
     };
