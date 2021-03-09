@@ -39,6 +39,19 @@ class SearchEngine
 
     def initialize(@url, @date, @crawl_time)
     end
+
+    # Serializes this result to JSON.
+    #
+    # The `url` is represented in string form, `date`'s representation is
+    # documented in `DateExtraction::Date#to_json`, and `crawl_time` is
+    # represented as float seconds.
+    def to_json(builder)
+      {
+        url:        url.to_s,
+        date:       date,
+        crawl_time: crawl_time.to_f,
+      }.to_json(builder)
+    end
   end
 end
 

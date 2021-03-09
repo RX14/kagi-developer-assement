@@ -1,6 +1,7 @@
 require "spec"
 require "http"
 require "../src/search_engine"
+require "../src/web_server"
 
 SPEC_SERVER = begin
   # Run a HTTP server for specs to access

@@ -48,6 +48,28 @@ module SearchEngine::DateExtraction
 
     # Two dates are equal if their year, month, and day are identical
     def_equals_and_hash @year, @month, @day
+
+    # :nodoc:
+    MONTH_NAMES = %w(Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec)
+
+    # Converts this `Date` to JSON.
+    #
+    # Representation is either `"2020"`, `"Jan, 2020"`, or `"Jan 1, 2020"`
+    # depending on the accuracy of this date.
+    def to_json(builder)
+      case {year = @year, month = @month, day = @day}
+      when {Int32, Int32, Int32}
+        str = "#{MONTH_NAMES[month - 1]} #{day}, #{year}"
+      when {Int32, Int32, nil}
+        str = "#{MONTH_NAMES[month - 1]}, #{year}"
+      when {Int32, nil, nil}
+        str = "#{year}"
+      else
+        raise "BUG: unreachable"
+      end
+
+      str.to_json(builder)
+    end
   end
 
   # Represents the result of a date extractor. Each date extractor will produce

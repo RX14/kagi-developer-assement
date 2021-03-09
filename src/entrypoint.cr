@@ -1,1 +1,3 @@
-require "./search_engine"
+require "./web_server"
+
+Kemal.run
