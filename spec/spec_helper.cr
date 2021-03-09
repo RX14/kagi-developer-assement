@@ -11,6 +11,9 @@ SPEC_SERVER = begin
     case ctx.request.path
     when "/status/500"
       ctx.response.respond_with_status(500)
+    when "/redirect"
+      ctx.response.headers["Location"] = "/sample1.html"
+      ctx.response.status_code = 302
     else
       ctx.response.respond_with_status(404)
     end

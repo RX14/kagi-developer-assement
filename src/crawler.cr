@@ -14,6 +14,11 @@ module SearchEngine::Crawler
   def self.crawl(url : URI) : Page
     # TODO: support redirects
     HTTP::Client.get(url, headers: CRAWLER_HEADERS) do |response|
+      if 300 <= response.status_code < 400 &&
+         (location = response.headers["Location"]?)
+        return crawl(url.resolve(location))
+      end
+
       unless response.status.ok?
         raise Crawler::Error.new("URL #{url} returned status #{response.status}")
       end
