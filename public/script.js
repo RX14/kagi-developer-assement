@@ -5,6 +5,7 @@
     const crawlTextarea = document.getElementById("crawl-textarea");
     const crawlFormBody = document.getElementById("crawl-form-body");
     const crawlTime = document.getElementById("crawl-time");
+    const crawlClearCache = document.getElementById("crawl-clear-cache");
 
     let websocket = new WebSocket(`ws://${document.location.host}/websocket`);
 
@@ -21,6 +22,12 @@
 
         const urls = crawlTextarea.value.split("\n");
         websocket.send(JSON.stringify({type: "crawl", urls}))
+    });
+
+    crawlClearCache.addEventListener("click", function(event) {
+        event.preventDefault();
+
+        websocket.send(JSON.stringify({type: "clear_cache"}));
     });
 
     function formatTime(float) {
