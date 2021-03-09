@@ -1,0 +1,36 @@
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="/bulma.min.css">
+    <link rel="stylesheet" href="/style.css">
+    <script src="/script.js" async></script>
+  </head>
+  <body>
+    <div class="container">
+      <form>
+        <div class="field">
+          <label class="label">URLs</label>
+          <div class="control">
+            <textarea id="crawl-textarea" class="textarea"></textarea>
+          </div>
+        </div>
+        <div class="field">
+          <div class="control is-pulled-right">
+            <button id="crawl-submit" class="button is-link">Go!</button>
+          </div>
+        </div>
+      </form>
+      <table class="table is-fullwidth">
+        <thead>
+          <tr>
+            <th>URL</th>
+            <th>Date</th>
+            <th>Time</th>
+          </tr>
+        </thead>
+        <tbody id="crawl-form-body">
+        </tbody>
+      </table>
+    </div>
+  </body>
+</html>
