@@ -36,6 +36,10 @@ private def crawl(ws, command)
   end
 end
 
+get "/" do |env|
+  env.redirect("/index.html")
+end
+
 ws "/websocket" do |ws|
   ws.on_message do |message|
     begin
