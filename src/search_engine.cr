@@ -1,7 +1,13 @@
+require "redis"
+
 # `SearchEngine` implements the logic to crawl and extract dates from a list of
 # URLs in parallel.
 class SearchEngine
   VERSION = "0.1.0"
+
+  def initialize(redis_host = "localhost", redis_port = 6379)
+    @crawler = Crawler.new(redis_host, redis_port)
+  end
 
   # Crawls a list of URLs in parallel, returning a channel of `Result`s.
   # The channel will be closed once the final result is sent.
@@ -15,7 +21,7 @@ class SearchEngine
         error_message = nil
 
         crawl_time = Time.measure do
-          page = Crawler.crawl(url)
+          page = @crawler.crawl(url)
           date = DateExtraction.extract_date(page)
         rescue ex
           error_message = ex.message

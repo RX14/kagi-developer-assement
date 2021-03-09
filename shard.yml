@@ -7,6 +7,9 @@ authors:
 dependencies:
   kemal:
     github: kemalcr/kemal
+  redis:
+    github: stefanwille/crystal-redis
+    version: ~> 2.6.0
 
 targets:
   search-engine:

@@ -43,5 +43,5 @@ def page(uri, html)
 end
 
 def crawl(route)
-  SearchEngine::Crawler.crawl(spec_url(route))
+  SearchEngine::Crawler.new.crawl(spec_url(route))
 end
