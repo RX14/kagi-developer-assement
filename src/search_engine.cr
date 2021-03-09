@@ -12,12 +12,20 @@ class SearchEngine
     urls.each do |url|
       spawn do
         date = nil
+        error_message = nil
+
         crawl_time = Time.measure do
           page = Crawler.crawl(url)
           date = DateExtraction.extract_date(page)
+        rescue ex
+          error_message = ex.message
         end
 
-        channel.send Result.new(url, date, crawl_time)
+        if error_message
+          channel.send Result.new(url, error_message, crawl_time)
+        else
+          channel.send Result.new(url, date, crawl_time)
+        end
 
         if atomic.sub(1) == 1
           # We are the final fiber to complete, close the channel
@@ -35,9 +43,13 @@ class SearchEngine
   class Result
     getter url : URI
     getter date : DateExtraction::Date?
+    getter error_message : String?
     getter crawl_time : Time::Span
 
-    def initialize(@url, @date, @crawl_time)
+    def initialize(@url, @date : DateExtraction::Date?, @crawl_time)
+    end
+
+    def initialize(@url, @error_message : String, @crawl_time)
     end
 
     # Serializes this result to JSON.
@@ -47,9 +59,10 @@ class SearchEngine
     # represented as float seconds.
     def to_json(builder)
       {
-        url:        url.to_s,
-        date:       date,
-        crawl_time: crawl_time.to_f,
+        url:           url.to_s,
+        date:          date,
+        error_message: error_message,
+        crawl_time:    crawl_time.to_f,
       }.to_json(builder)
     end
   end
