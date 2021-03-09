@@ -17,6 +17,7 @@
         event.preventDefault();
 
         crawlFormBody.innerHTML = "";
+        crawlTime.innerText = "";
 
         const urls = crawlTextarea.value.split("\n");
         websocket.send(JSON.stringify({type: "crawl", urls}))
@@ -55,7 +56,7 @@
                 handleCrawlResult(response.crawl_result);
                 break;
             case "done":
-                crawlTime.innerText = formatTime(response.total_time);
+                crawlTime.innerText = "Search completed in " + formatTime(response.total_time);
                 break;
         }
     };
