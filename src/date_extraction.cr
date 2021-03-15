@@ -7,6 +7,7 @@ module SearchEngine::DateExtraction
     ->extract_date_from_url(Crawler::Page),
     ->extract_date_from_opengraph(Crawler::Page),
     ->extract_date_from_rdf(Crawler::Page),
+    ->extract_date_from_papers_meta(Crawler::Page),
     ->extract_date_from_time_element(Crawler::Page),
   ] of Crawler::Page -> DateExtraction::Result?
 
@@ -130,6 +131,20 @@ module SearchEngine::DateExtraction
   # See https://schema.org/datePublished
   def self.extract_date_from_rdf(page : Crawler::Page) : Result?
     node = page.html.xpath_node("//meta[@itemprop='datePublished']")
+    return unless node
+
+    return unless time = node["content"]?
+
+    if date = fuzzy_parse_date(time)
+      Result.new(date, 9)
+    end
+  end
+
+  # Extracts publication date from papers meta in head.
+  #
+  # See https://www.w3.org/WAI/RD/wiki/Indexing
+  def self.extract_date_from_papers_meta(page : Crawler::Page) : Result?
+    node = page.html.xpath_node("//meta[@name='citation_publication_date']")
     return unless node
 
     return unless time = node["content"]?

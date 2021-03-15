@@ -184,6 +184,38 @@ describe SearchEngine::DateExtraction do
     end
   end
 
+  describe ".extract_date_from_papers_meta" do
+    it "ignores pages with no date" do
+      page = page("http://example.com/article", empty_html)
+      result = DateExtraction.extract_date_from_papers_meta(page)
+      result.should be_nil
+
+      page = crawl("github.html")
+      result = DateExtraction.extract_date_from_papers_meta(page)
+      result.should be_nil
+    end
+
+    it "extracts date from citation_publication_date meta" do
+      page = page("http://example.com/article", <<-HTML)
+        <html>
+          <head>
+            <meta name="citation_publication_date" content="2021/3/8" />
+          </head>
+        </html>
+        HTML
+      result = DateExtraction.extract_date_from_papers_meta(page).not_nil!
+
+      result.confidence.should eq(9)
+      result.date.should eq(Date.new(2021, 3, 8))
+
+      page = crawl("journal.html")
+      result = DateExtraction.extract_date_from_papers_meta(page).not_nil!
+
+      result.confidence.should eq(9)
+      result.date.should eq(Date.new(2019, 12, 7))
+    end
+  end
+
   describe ".extract_date_from_time_element" do
     it "ignores pages with no date" do
       page = page("http://example.com/article", empty_html)
