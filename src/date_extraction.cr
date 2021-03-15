@@ -7,6 +7,7 @@ module SearchEngine::DateExtraction
     ->extract_date_from_url(Crawler::Page),
     ->extract_date_from_opengraph(Crawler::Page),
     ->extract_date_from_rdf(Crawler::Page),
+    ->extract_date_from_time_element(Crawler::Page),
   ] of Crawler::Page -> DateExtraction::Result?
 
   # Extracts a date from a `Crawler::Page` by running all registered date
@@ -139,13 +140,13 @@ module SearchEngine::DateExtraction
   end
 
   def self.extract_date_from_time_element(page : Crawler::Page) : Result?
-    nodes = page.html.xpath_nodes("//time")
+    nodes = page.html.xpath_nodes("//time | //*[@datetime]")
     return if nodes.empty?
 
     node = nodes.first
     datetime = node["datetime"]? || node.text
 
-    score = nodes.size > 1 ? 6 : 4
+    score = nodes.size > 1 ? 4 : 6
     if date = fuzzy_parse_date(datetime)
       return Result.new(date, score)
     end

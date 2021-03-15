@@ -163,7 +163,7 @@ describe SearchEngine::DateExtraction do
       result.should be_nil
     end
 
-    it "extracts date from opengraph article:published_time properties" do
+    it "extracts date from RDF datePublished properties" do
       page = page("http://example.com/article", <<-HTML)
         <html>
           <head>
@@ -181,6 +181,50 @@ describe SearchEngine::DateExtraction do
 
       result.confidence.should eq(9)
       result.date.should eq(Date.new(2019, 6, 10))
+    end
+  end
+
+  describe ".extract_date_from_time_element" do
+    it "ignores pages with no date" do
+      page = page("http://example.com/article", empty_html)
+      result = DateExtraction.extract_date_from_time_element(page)
+      result.should be_nil
+
+      page = crawl("no-content.html")
+      result = DateExtraction.extract_date_from_time_element(page)
+      result.should be_nil
+    end
+
+    it "extracts date from time elements" do
+      page = page("http://example.com/article", <<-HTML)
+        <html>
+          <body>
+            <time>2021-03-08</time>
+          </body>
+        </html>
+        HTML
+      result = DateExtraction.extract_date_from_time_element(page).not_nil!
+
+      result.confidence.should eq(6)
+      result.date.should eq(Date.new(2021, 3, 8))
+
+      page = page("http://example.com/article", <<-HTML)
+        <html>
+          <body>
+            <time datetime="2021-03-08T04:04:23Z">No time!</time>
+          </body>
+        </html>
+        HTML
+      result = DateExtraction.extract_date_from_time_element(page).not_nil!
+
+      result.confidence.should eq(6)
+      result.date.should eq(Date.new(2021, 3, 8))
+
+      page = crawl("github.html")
+      result = DateExtraction.extract_date_from_time_element(page).not_nil!
+
+      result.confidence.should eq(4)
+      result.date.should eq(Date.new(2020, 2, 2))
     end
   end
 

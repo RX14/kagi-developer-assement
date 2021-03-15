@@ -15,12 +15,12 @@ describe SearchEngine do
     it "returns crawl results for each URL" do
       engine = SearchEngine.new
 
-      urls = [spec_url("github.html"), spec_url("sample1.html")]
+      urls = [spec_url("no-content.html"), spec_url("sample1.html")]
       chan = engine.crawl(urls)
 
       while result = chan.receive?
         case result.url
-        when spec_url("github.html")
+        when spec_url("no-content.html")
           result.date.should be_nil
         when spec_url("sample1.html")
           result.date.should eq(Date.new(2019, 6, 10))

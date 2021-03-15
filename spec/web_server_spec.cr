@@ -40,7 +40,7 @@ describe "SearchEngine web server" do
     it "returns crawl data" do
       with_websocket do |ws|
         ws.send %<{"type": "crawl", "urls": [
-            #{spec_url("github.html").to_s.to_json},
+            #{spec_url("no-content.html").to_s.to_json},
             #{spec_url("sample1.html").to_s.to_json}
           ]}>
 
@@ -55,7 +55,7 @@ describe "SearchEngine web server" do
 
           json["type"].should eq("result")
           case json["crawl_result"]["url"]
-          when spec_url("github.html").to_s
+          when spec_url("no-content.html").to_s
             json["crawl_result"]["date"].should eq(nil)
           when spec_url("sample1.html").to_s
             json["crawl_result"]["date"].should eq("Jun 10, 2019")
