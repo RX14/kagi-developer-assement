@@ -4,6 +4,10 @@ private alias DateExtraction = SearchEngine::DateExtraction
 private alias Date = DateExtraction::Date
 private alias Result = DateExtraction::Result
 
+private def fuzzy_parse_date(date)
+  DateExtraction.fuzzy_parse_date(date)
+end
+
 describe SearchEngine::DateExtraction do
   describe "Result" do
     it "accepts confidence in range 0..10" do
@@ -145,6 +149,78 @@ describe SearchEngine::DateExtraction do
 
       result.confidence.should eq(9)
       result.date.should eq(Date.new(2019, 6, 10))
+    end
+  end
+
+  describe ".extract_date_from_rdf" do
+    it "ignores pages with no date" do
+      page = page("http://example.com/article", empty_html)
+      result = DateExtraction.extract_date_from_rdf(page)
+      result.should be_nil
+
+      page = crawl("github.html")
+      result = DateExtraction.extract_date_from_rdf(page)
+      result.should be_nil
+    end
+
+    it "extracts date from opengraph article:published_time properties" do
+      page = page("http://example.com/article", <<-HTML)
+        <html>
+          <head>
+            <meta itemprop="datePublished" content="2021-03-08" />
+          </head>
+        </html>
+        HTML
+      result = DateExtraction.extract_date_from_rdf(page).not_nil!
+
+      result.confidence.should eq(9)
+      result.date.should eq(Date.new(2021, 3, 8))
+
+      page = crawl("sample1.html")
+      result = DateExtraction.extract_date_from_rdf(page).not_nil!
+
+      result.confidence.should eq(9)
+      result.date.should eq(Date.new(2019, 6, 10))
+    end
+  end
+
+  describe "MONTHS_REGEX" do
+    it "matches months" do
+      months = %w(Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec)
+      months += %w(January Febuary March April June July August September October)
+      months += %w(November December)
+      months += months.map(&.downcase) + months.map(&.upcase)
+
+      regex = /#{DateExtraction::MONTHS_REGEX}/i
+
+      months.each do |month|
+        match = regex.match("foo#{month}bar").not_nil!
+        match["human_month"].should eq(month)
+      end
+    end
+  end
+
+  describe ".fuzzy_parse_date" do
+    it "extracts dates" do
+      fuzzy_parse_date("2020").should eq(Date.new(2020))
+      fuzzy_parse_date("2020-04").should eq(Date.new(2020, 4))
+      fuzzy_parse_date("2020-05-04").should eq(Date.new(2020, 5, 4))
+      fuzzy_parse_date("2019-06-20T14:35:00-04:00").should eq(Date.new(2019, 6, 20))
+      fuzzy_parse_date("2020/04").should eq(Date.new(2020, 4))
+      fuzzy_parse_date("2020/05/04").should eq(Date.new(2020, 5, 4))
+
+      fuzzy_parse_date("jan 2020").should eq(Date.new(2020, 1))
+      fuzzy_parse_date("1 Feb, 2020").should eq(Date.new(2020, 2, 1))
+      fuzzy_parse_date("1st Mar 2020").should eq(Date.new(2020, 3, 1))
+      fuzzy_parse_date("2nd Apr 2020").should eq(Date.new(2020, 4, 2))
+      fuzzy_parse_date("3rd May, 2020").should eq(Date.new(2020, 5, 3))
+      fuzzy_parse_date("4th Jun 2020").should eq(Date.new(2020, 6, 4))
+      fuzzy_parse_date("Jul 5 2020").should eq(Date.new(2020, 7, 5))
+      fuzzy_parse_date("Aug 1st, 2020").should eq(Date.new(2020, 8, 1))
+      fuzzy_parse_date("sep 2nd 2020").should eq(Date.new(2020, 9, 2))
+      fuzzy_parse_date("oct 3rd, 2020").should eq(Date.new(2020, 10, 3))
+      fuzzy_parse_date("noV 4th 2020").should eq(Date.new(2020, 11, 4))
+      fuzzy_parse_date("Dec 5th 2020").should eq(Date.new(2020, 12, 5))
     end
   end
 end

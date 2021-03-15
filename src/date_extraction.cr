@@ -6,6 +6,7 @@ module SearchEngine::DateExtraction
   DATE_EXTRACTORS = [
     ->extract_date_from_url(Crawler::Page),
     ->extract_date_from_opengraph(Crawler::Page),
+    ->extract_date_from_rdf(Crawler::Page),
   ] of Crawler::Page -> DateExtraction::Result?
 
   # Extracts a date from a `Crawler::Page` by running all registered date
@@ -121,5 +122,74 @@ module SearchEngine::DateExtraction
     time = Time.parse_iso8601(time)
 
     Result.new(Date.new(time), 9)
+  end
+
+  # Extracts publication date from RDF tags in the page.
+  #
+  # See https://schema.org/datePublished
+  def self.extract_date_from_rdf(page : Crawler::Page) : Result?
+    node = page.html.xpath_node("//meta[@itemprop='datePublished']")
+    return unless node
+
+    return unless time = node["content"]?
+
+    if date = fuzzy_parse_date(time)
+      Result.new(date, 9)
+    end
+  end
+
+  def self.extract_date_from_time_element(page : Crawler::Page) : Result?
+    nodes = page.html.xpath_nodes("//time")
+    return if nodes.empty?
+
+    node = nodes.first
+    datetime = node["datetime"]? || node.text
+
+    score = nodes.size > 1 ? 6 : 4
+    if date = fuzzy_parse_date(datetime)
+      return Result.new(date, score)
+    end
+  end
+
+  MONTHS_REGEX = "(?<human_month>Jan(uary)?|Feb(uary)?|Mar(ch)?|Apr(il)?|May|June?|July?" +
+                 "|Aug(ust)?|Sep(tember)?|Oct(ober)?|Nov(ember)?|Dec(ember)?)"
+  DATE_REGEXES = [
+    /\b((?<day>\d\d?)(st|nd|rd|th)?\s+)(#{MONTHS_REGEX},?\s+)(?<year>20\d\d)\b/i,
+    /\b(#{MONTHS_REGEX}\s+)((?<day>\d\d?)(st|nd|rd|th)?,?\s+)?(?<year>20\d\d)\b/i,
+    /\b(?<year>20\d\d)([\/-](?<month>\d\d?)([\/-](?<day>\d\d?))?)?/i,
+  ]
+
+  # Attempt to turn a string into a `Date`. Supports several human readable or
+  # machine readable formats.
+  def self.fuzzy_parse_date(date : String) : Date?
+    DATE_REGEXES.each do |regex|
+      if match = regex.match(date)
+        year = match["year"].to_i
+        month = match["month"]?.try(&.to_i) || parse_month(match["human_month"]?)
+        day = match["day"]?.try(&.to_i)
+        return Date.new(year, month, day)
+      end
+    end
+  end
+
+  private def self.parse_month(month : String?) : Int32?
+    return unless month
+
+    case month.downcase
+    when .starts_with? "jan" then 1
+    when .starts_with? "feb" then 2
+    when .starts_with? "mar" then 3
+    when .starts_with? "apr" then 4
+    when .starts_with? "may" then 5
+    when .starts_with? "jun" then 6
+    when .starts_with? "jul" then 7
+    when .starts_with? "aug" then 8
+    when .starts_with? "sep" then 9
+    when .starts_with? "oct" then 10
+    when .starts_with? "nov" then 11
+    when .starts_with? "dec" then 12
+    else
+      raise "BUG: regex matched invalid date"
+    end
   end
 end
