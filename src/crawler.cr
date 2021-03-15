@@ -8,7 +8,7 @@ require "xml"
 # expire.
 class SearchEngine::Crawler
   CRAWLER_HEADERS = HTTP::Headers{
-    "User-Agent" => "ExampleSearchEngine/#{SearchEngine::VERSION}",
+    "User-Agent" => "Mozilla/5.0 (compatible; ExampleSearchEngine/#{SearchEngine::VERSION}) Firefox/85.0 ",
   }
 
   class Error < Exception

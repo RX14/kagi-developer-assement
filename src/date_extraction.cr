@@ -139,6 +139,13 @@ module SearchEngine::DateExtraction
     end
   end
 
+  # Extracts publication date from <time> elements in the page.
+  #
+  # The first time element is used, but if there are more than one the score is
+  # lowered because we can't be sure the date chosen is the correct one.
+  #
+  # TODO: handle multiple of the same date as a single date, and prefer repeated
+  # dates.
   def self.extract_date_from_time_element(page : Crawler::Page) : Result?
     nodes = page.html.xpath_nodes("//time | //*[@datetime]")
     return if nodes.empty?
