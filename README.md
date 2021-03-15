@@ -2,14 +2,18 @@
 
 An example search engine written for Kagi developer assessment.
 
+[API Documentation](https://rx14.co.uk/search-engine-example-docs/)
+
 ## Installation
 
-Running `shards build` will build an executable in bin/search-engine.
-Running this executable will print a URL for a development server.
+Running `shards build` will build an executable in `bin/search-engine`.
 
 ## Usage
 
-TODO: Write usage instructions here
+This application requires a Redis server for caching. Provide the URL of the
+Redis server in the `REDIS_URL` env var, similar to `REDIS_URL=redis://host:port`.
+Running `bin/search-engine` will start the web server on `0.0.0.0:3000`.
+Change the server bind address and port with `--bind` and `--port`.
 
 ## Development
 
@@ -20,7 +24,7 @@ classes implement fetching the page, and extracting the date from the page respe
 The `SearchEngine` class contains all the transient state (database connection) for the
 search engine, and provides a coordination point for the high level tasks including
 dispatching searches in parallel.
-The API documentation provides further details on these classes.
+The API documentation (linked above) provides further details on these classes.
 
 ## Contributing
 

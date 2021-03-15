@@ -14,10 +14,16 @@ class SearchEngine::Crawler
   class Error < Exception
   end
 
-  def initialize(redis_host = "localhost", redis_port = 6379)
-    @redis = Redis::PooledClient.new(redis_host, redis_port)
+  def initialize(redis_url = ENV["REDIS_URL"]?)
+    @redis = Redis::PooledClient.new(url: redis_url)
   end
 
+  # Crawl a URL and return a `Page`, which contains the URL crawled and the
+  # parsed HTML DOM. Redirects are handled transparently.
+  #
+  # Caching is performed based on the URL (in it's entirety), and cached results
+  # are returned if they exist. The cache currently persists forever, until
+  # `#clear_cache` is called.
   def crawl(url : URI) : Page
     redis_key = "search_engine:url_cache:#{url}"
     html = @redis.get(redis_key)
@@ -36,7 +42,7 @@ class SearchEngine::Crawler
     Page.new(url, html)
   end
 
-  def request(url : URI) : String
+  private def request(url : URI) : String
     response = HTTP::Client.get(url, headers: CRAWLER_HEADERS)
     if 300 <= response.status_code < 400 &&
        (location = response.headers["Location"]?)
@@ -50,6 +56,7 @@ class SearchEngine::Crawler
     response.body
   end
 
+  # Clears the redis page cache containing fetched page data.
   def clear_cache
     cursor = "0"
 
@@ -60,8 +67,12 @@ class SearchEngine::Crawler
     end
   end
 
+  # Represents a crawled webpage.
   class Page
+    # The URL of the webpage crawled.
     getter url : URI
+
+    # Parsed HTML of the webpage crawled.
     getter html : XML::Node
 
     def initialize(@url, @html)
