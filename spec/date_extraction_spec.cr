@@ -62,37 +62,37 @@ describe SearchEngine::DateExtraction do
       page = page("http://example.com/blog/2020/03/12/article", empty_html)
       result = DateExtraction.extract_date_from_url(page).not_nil!
 
-      result.confidence.should eq(2)
+      result.confidence.should eq(7)
       result.date.should eq(Date.new(2020, 3, 12))
 
       page = page("http://example.com/blog/2020/3/article", empty_html)
       result = DateExtraction.extract_date_from_url(page).not_nil!
 
-      result.confidence.should eq(2)
+      result.confidence.should eq(7)
       result.date.should eq(Date.new(2020, 3))
 
       page = page("http://example.com/blog/2020/article", empty_html)
       result = DateExtraction.extract_date_from_url(page).not_nil!
 
-      result.confidence.should eq(2)
+      result.confidence.should eq(7)
       result.date.should eq(Date.new(2020))
 
       page = page("http://example.com/blog/article-2020-2-3", empty_html)
       result = DateExtraction.extract_date_from_url(page).not_nil!
 
-      result.confidence.should eq(2)
+      result.confidence.should eq(7)
       result.date.should eq(Date.new(2020, 2, 3))
 
       page = page("http://example.com/blog/2020/2_3-article", empty_html)
       result = DateExtraction.extract_date_from_url(page).not_nil!
 
-      result.confidence.should eq(2)
+      result.confidence.should eq(7)
       result.date.should eq(Date.new(2020, 2, 3))
 
       page = page("http://example.com/20210308-article", empty_html)
       result = DateExtraction.extract_date_from_url(page).not_nil!
 
-      result.confidence.should eq(2)
+      result.confidence.should eq(7)
       result.date.should eq(Date.new(2021, 3, 8))
     end
 

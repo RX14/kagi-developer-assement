@@ -107,7 +107,7 @@ module SearchEngine::DateExtraction
     month = match[2]?.try(&.to_i)
     day = match[3]?.try(&.to_i)
 
-    Result.new(Date.new(year, month, day), 2)
+    Result.new(Date.new(year, month, day), 7)
   end
 
   # Extracts publication date from opengraph tags in the page.
