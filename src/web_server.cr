@@ -2,21 +2,29 @@ require "./search_engine"
 require "kemal"
 require "json"
 
-class Command
+private class Command
   include JSON::Serializable
 
+  # Type of command, either "crawl" or "clear_cache".
   getter type : String
 
+  # Array of URLs to crawl. Present iff `type` is "crawl".
   getter urls : Array(String)?
 end
 
-class Response
+private class Response
   include JSON::Serializable
 
+  # Type of response, either "result" or "done".
+  #
+  # In response to a "crawl" command, a "result" response is returned once for
+  # each URL, followed by a "done" to indicate the crawl is complete.
   getter type : String
 
+  # Crawl result, present iff `type` is "result".
   getter crawl_result : SearchEngine::Result?
 
+  # Total time to handle the crawl command, present iff `type` is "done".
   getter total_time : Float64?
 
   def initialize(*, @crawl_result : SearchEngine::Result)

@@ -26,6 +26,20 @@ search engine, and provides a coordination point for the high level tasks includ
 dispatching searches in parallel.
 The API documentation (linked above) provides further details on these classes.
 
+### API
+
+The frontend connects to the backend with a websocket, using the `/websocket` endpoint.
+Using a websocket allows responded to stream back as the backend finishes processing them.
+The frontend sends commands to the backend, and the backend returns results.
+Commands are currently either a list of URLs to process, or a request to clear
+the cache.
+Results can either be a finalised result (date or not; or error), or a "done" message
+containing final processing time.
+
+After the browser sends a crawl command down the websocket, the server sends a result
+response once for each URL on the crawl request, as soon as the crawl for that URL
+finishes. A done message indicates the processing of the crawl is complete.
+
 ## Contributing
 
 1. Fork it (<https://github.com/RX14/vladimir-prelovac-job-opportunity/fork>)
